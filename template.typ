@@ -4,7 +4,7 @@
 #let serif-italic = "Inter Italic"
 #let monospace = "Fira Code"
 #let text-size = 6pt
-#let gray(v) = rgb(v, v, v)
+#let gray = luma
 #let left-pad(length, pad, input) = pad * calc.max(0, length - input.len()) + input
 // A thin space to use as a thousands separator.
 #let thousand = h(1pt)
@@ -50,11 +50,11 @@
 	}
 	let num-columns = columns.len()
 	block(breakable: false, {
-		block(fill: gray(230), outset: 0pt, inset: 2pt, below: 0pt, width: 100%, stroke: line-stroke, [*#name;*])
-		tablex(columns: columns, align: left + horizon, header-rows: 1, map-hlines: (v) => (..v, stroke: line-stroke), map-vlines: (v) => (..v, stroke: line-stroke), auto-lines: false, inset: 3pt, fill: (_col, row) => if calc.even(row) { white } else { gray(244) }, hlinex(), vlinex(), ..args, hlinex(), vlinex())
+		block(fill: gray(238), outset: 0pt, inset: 2pt, below: 0pt, width: 100%, stroke: line-stroke, [*#name;*])
+		tablex(columns: columns, align: left + horizon, header-rows: 1, map-hlines: (v) => (..v, stroke: line-stroke), map-vlines: (v) => (..v, stroke: line-stroke), auto-lines: false, inset: 3pt, fill: (_col, row) => if calc.even(row) { gray(255) } else { gray(248) }, hlinex(), vlinex(), ..args, hlinex(), vlinex())
 	})
 }
-#let instruction-table(name, ..args) = info-table(name, 4, main-column: 2, (), vlinex(), vlinex(), (), ..args)
+#let instruction-table(name, extra-column: true, ..args) = info-table(name, if extra-column { 4 } else { 3 }, main-column: 2, (), vlinex(), vlinex(), (), ..args)
 
 #let heading-group(content) = {
 	show heading: set block(spacing: 5pt)
@@ -131,7 +131,8 @@ let make-row(num) = {
 	}
 	let pow2 = text(font: monospace, chunks(3, str(calc.pow(2, num)), from: "end").join(sym.space.quarter))
 	let binary = text(font: monospace, chunks(4, left-pad(4, "0", str(num, base: 2)), from: "end").join(sym.space.quarter))
-	(str(num), upper(str(num, base: 16)), binary, m16, si-unit, pow2, "")
+	let num-dec = if num == 14 { 13 } else { num }; // Intentional error.
+	(str(num-dec), upper(str(num, base: 16)), binary, m16, si-unit, pow2, "")
 }
 info-table("Powers/Hexadecimal", 7,
 	$N=$, vlinex(), "Hex", vlinex(), "Binary", vlinex(), $M_16=$, vlinex(), "iB", vlinex(), [$2^N$ and $16^M$], vlinex(), "Notes",
@@ -154,19 +155,24 @@ info-table("GNU Debugger (GDB) Commands", 3,
 	[#u("s")tep], [_lines_], [Runs a single (or _lines_) instruction or source line],
 	[#u("i")nfo], [b, f, r, s], [Display #u("b")reakpoint, #u("r")egister, #u("f")p registers, or #u("s")tack],
 	[#u("p")rint/f], [_(type) myVar_], [Display w/type of (int), (float) /f => x-hex, f-float, t-bin],
-	[e#u("x")amine], [_/nfu address_], [Display value at address /n => Number of elements to display, f => #u("s")tring, #u("i")nstruction, he#u("x"), /u => size in #u("b")yte, #u("h")alfword, #u("w")ord],
-	[#u("q")uit], "", "Quit GDB",
-	[#u("h")elp], "", "Get help on a GDB command",
+	[e#u("x")amine], [_/nfu address_], [Display value at address /n => Num elems, f => #u("s")tring, #u("i")nstruction, he#u("x"), /u => size in #u("b")yte, #u("h")alfword, #u("w")ord],
+	// [#u("q")uit], "", "Quit GDB",
+	// [#u("h")elp], "", "Get help on a GDB command",
 )
 }
 
 #let bit(..xs) = text(font: monospace, "0x" + chunks(4, left-pad(8, "0", str(xs.pos().map(x => calc.pow(2, x)).sum(), base: 16))).join(thousand))
 
 #let ref-card = (body) => {
-	set page(flipped: true, paper: "a4", margin: 15pt)
+	set page(flipped: true, paper: "us-legal", margin: 16pt)
 	set text(font: serif, stylistic-set: 2, size: text-size, fallback: false)
 
 	show heading: it => align(center, it)
+	show math.equation: it => {
+		show ":": it => { h(0pt); it; h(0pt); }
+		show ";": it => { it; h(2pt) }
+		it
+	}
 	show: it => columns(4, gutter: 5pt, it)
 	set block(spacing: 5pt)
 

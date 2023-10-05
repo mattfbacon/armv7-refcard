@@ -7,9 +7,10 @@
 
 // TODO:
 // - Explain the meanings of mnemonic characters in the tables as comments in this document, for maintainability
-// - Explain the meaning of the macron over operators
-// - Figure out if it is possible to write Rd:Rn without the spacing around the colon
+// - (Typst issue) Figure out if it is possible to write Rd:Rn without the spacing around the colon
 // - (Typst issue) math subscripts and superscripts are a bit cramped at the moment.
+
+// - Remove columns for ARM versions, and for "I" key etc
 
 #heading-group[
 = ARMv7 Quick Reference Guide
@@ -51,7 +52,7 @@
 	".text", "", "Enter the text section",
 	".balign", "4, 0x20", "Write 0x20 until a 4-byte boundary",
 	".byte", "0x12", "Allocate a byte with hex 12",
-	".hword", "0x3456", "Allocate 2 bytes with hex 5635", // Intentional error
+	".hword", "0x3456", "Allocate 2 bytes with hex 5635", // Intentional error.
 	".word", "0x6789abcd", "Allocate 4 bytes with hex cdab8967",
 	".quad", "0x2345", "Allocate 8 bytes with hex 452300...00",
 	".octa", "0x6789", "Allocate 16 bytes with hex 896700...00",
@@ -89,38 +90,38 @@
 // Logic and
 #let land = $class("binary", "&")$
 #let signed = $plus.minus$
-#let pmeq = sym.plus.minus + "="
+#let unsigned = $diameter$
+#let ifm(cond) = $"if"(cond) med$
 
 #instruction-table("Bitwise and Move Instructions",
-	"AND{S}", $Rd, Rn, op2$, $Rd = Rn land op2$, "",
-	"ASR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn asr shift$, "",
-	"ASR{S}", $Rd, Rn, Rs$, $Rd = Rn asr Rs$, "",
-	"BFC", $Rd, \#p, \#n$, $Rd_(p + n - 1:p) = 0_n$, "6t",
-	"BFI", $Rd, Rn, \#p, \#n$, $Rd_(p + n - 1:p) = Rn_(n-1:0)$, "6t",
-	"BIC{S}", $Rd, Rn, op2$, $Rd = Rn land space.med ~op2$, "",
+	"AND{S}", $Rd, Rn, op2$, $Rd = Rn land op2$, "NZC",
+	"ASR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn asr shift$, "NZC",
+	"ASR{S}", $Rd, Rn, Rs$, $Rd = Rn asr Rs$, "NZC",
+	"BFC", $Rd, \#p, \#n$, $Rd_(p + n - 1:p) = 0_n$, "",
+	"BFI", $Rd, Rn, \#p, \#n$, $Rd_(p + n - 1:p) = Rn_(n-1:0)$, "",
+	"BIC{S}", $Rd, Rn, op2$, $Rd = Rn land space.med ~op2$, "NZC",
 	"CLZ", $Rd, Rn$, $Rd = upright("CountLeadingZeros")(Rn)$, "",
-	"EOR{S}", $Rd, Rn, op2$, $Rd = Rn xor op2$, "",
-	"LSL{S}", $Rd, Rn, \#shift_5$, $Rd = Rn << shift$, "",
-	"LSL{S}", $Rd, Rn, Rs$, $Rd = Rn << Rs$, "",
-	"LSR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn >> shift$, "",
-	"LSR{S}", $Rd, Rn, Rs$, $Rd = Rn >> Rs$, "",
-	"MOV{S}", $Rd, op2$, $Rd = op2$, "",
-	"MOVT", $Rd, \#i_16$, $Rd_(31:16) = i$, "6t",
-	// TODO what does this superscript symbol mean?
-	"MOVW", $Rd, \#i_16$, $Rd = i^diameter$, "6t",
-	"MVN{S}", $Rd, op2$, $Rd = ~op2$, "",
-	"ORR{S}", $Rd, Rn, op2$, $Rd = Rn | op2$, "",
-	"RBIT", $Rd, Rn$, $Rd = upright("ReverseBits")(Rn)$, "6t",
-	"REV", $Rd, Rn$, $Rd = Rn_"B0":Rn_"B1":Rn_"B2":Rn_"B3"$, "6",
-	"REV16", $Rd, Rn$, $Rd = Rn_"B2":Rn_"B3":Rn_"B0":Rn_"B1"$, "6",
-	"REVSH", $Rd, Rn$, $Rd = Rn^signed_"B0":Rn_"B1"$, "6",
-	"ROR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn >>> shift$, "",
-	"ROR{S}", $Rd, Rn, Rs$, $Rd = Rn >>> Rs$, "",
-	"RRX{S}", $Rd, Rn$, $Rd = C:Rn_(31:1); space carry = Rn_0$, "",
-	"SBFX", $Rd, Rn, \#p, \#n$, $Rd = Rn^signed_(p+n-1:p)$, "6t",
-	"TEQ", $Rd, op2$, $Rd xor op2$, "",
-	"TST", $Rd, op2$, $Rd land op2$, "",
-	"UBFX", $Rd, Rn, \#p, \#n$, $Rd = Rn^diameter_(p+n-1:p)$, "6t",
+	"EOR{S}", $Rd, Rn, op2$, $Rd = Rn xor op2$, "NZC",
+	"LSL{S}", $Rd, Rn, \#shift_5$, $Rd = Rn << shift$, "NZC",
+	"LSL{S}", $Rd, Rn, Rs$, $Rd = Rn << Rs$, "NZC",
+	"LSR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn >> shift$, "NZC",
+	"LSR{S}", $Rd, Rn, Rs$, $Rd = Rn >> Rs$, "NZC",
+	"MOV{S}", $Rd, op2$, $Rd = op2$, "NZC",
+	"MOVT", $Rd, \#i_16$, $Rd_(31:16) = i$, "",
+	"MOVW", $Rd, \#i_16$, $Rd_(31:16) = 0; Rd_(15:0) = i$, "",
+	"MVN{S}", $Rd, op2$, $Rd = ~op2$, "NZC",
+	"ORR{S}", $Rd, Rn, op2$, $Rd = Rn | op2$, "NZC",
+	"RBIT", $Rd, Rn$, $Rd = upright("ReverseBits")(Rn)$, "",
+	"REV", $Rd, Rn$, $Rd = Rn_"B0":Rn_"B1":Rn_"B2":Rn_"B3"$, "",
+	"REV16", $Rd, Rn$, $Rd = Rn_"B2":Rn_"B3":Rn_"B0":Rn_"B1"$, "",
+	"REVSH", $Rd, Rn$, $Rd = Rn^signed_"B0":Rn_"B1"$, "",
+	"ROR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn >>> shift$, "NZC",
+	"ROR{S}", $Rd, Rn, Rs$, $Rd = Rn >>> Rs$, "NZC",
+	"RRX{S}", $Rd, Rn$, $Rd = C:Rn_(31:1); carry = Rn_0$, "NZC",
+	"SBFX", $Rd, Rn, \#p, \#n$, $Rd = Rn^signed_(p+n-1:p)$, "",
+	"TEQ", $Rd, op2$, $Rd xor op2$, "NZ",
+	"TST", $Rd, op2$, $Rd land op2$, "NZ",
+	"UBFX", $Rd, Rn, \#p, \#n$, $Rd = Rn^unsigned_(p+n-1:p)$, "",
 )
 
 #info-table("Operand 2", 2,
@@ -130,71 +131,64 @@
 	$Rm, "lsr" \#n$, $Rm >> {1..32}$,
 	$Rm, "asr" \#n$, $Rm asr {1..32}$,
 	$Rm, "ror" \#n$, $Rm >>> {1..31}$,
-	$Rm, "rrx"$, [$C:Rm_(31:1); space carry = Rm_0$],
+	$Rm, "rrx"$, [$C:Rm_(31:1); carry = Rm_0$],
 	$Rm, "lsl" Rs$, $Rm << Rs$,
 	$Rm, "lsr" Rs$, $Rm >> Rs$,
 	$Rm, "asr" Rs$, $Rm asr Rs$,
 	$Rm, "ror" Rs$, $Rm >>> Rs$,
 )
 
-#instruction-table("Branch and Jump Instructions",
-	"B", $"rel"_26$, $PC = PC + "rel"^signed_"25:2":0_"1:0"$, "",
-	"Bcc", $"rel"_21$, $"if"("cc") PC = PC + "rel"^signed_"20:1":0$, "I",
-	"BKPT", $\#i_16$, $"BreakPoint"(i)$, "I",
-	"BL", $"rel"_26$, $LR = PC_(31:1):0; PC "+=" "rel"^signed_(25:2):0_(1:0)$, "",
-	// TODO What does "Set" mean?
-	"BLX", $"rel"_26$, $LR = PC_(31:1):0; "Set" = 1; PC "+=" "rel"^signed_(25:1):0$, "",
-	"BLX", $Rm$, $LR = PC_(31:1):0; "Set" = Rm_0; PC = Rm_(31:1):0$, "",
-	"BX", $Rm$, $"Set" = Rm_0; PC = Rm_(31:1):0$, "",
-)
-
-#info-table("Keys", 2,
-	"{S}", "Optional suffix; if present, update flags",
-	"op2", "Immediate or shifted register",
-)
-
-#instruction-table("Load and Store Addressing Modes",
-	"MOV{S}", $Rd, "#0b000111"$, $Rd = 000111_2$, "",
-	"LDR", $Rt, "=some_label"$, [$Rt = upright("AddressOf")("some_label")$ \ #align(right, text(size: text-size - 1pt, "(Load 32-bit address from literal pool)"))], "P",
-	"LDR", $Rt, [Rn]$, $Rt = Mem[Rn]$, "",
-	"LDR", $Rt, [Rn, \#4]$, $Rt = Mem[Rn + 4]$, "",
-	"LDR", $Rt, [Rn], \#+4$, $"Post:" Rt = Mem[Rn_"Orig"]; space.hair Rn = Rn + 4$, "",
-	"LDR", $Rt, [Rn, Rm]$, $Rt = Mem[Rn + Rm]$, "",
-	"LDR", $Rt, [Rn, Rm, "lsl" #3]$, $Rt = Mem[Rn + Rm << 3]$, "",
-	"STR", $Rt, [Rn]$, $Mem[Rn] = Rt$, "",
-	"STR", $Rt, [Rn, \#4]$, $Mem[Rn + 4] = Rt$, "",
-	"STR", $Rt, [Rn, \#4]!$, $"Pre:" Rn = Rn + 4, Mem[Rn_"New"] = Rt$, "",
-	"STR", $Rt, [Rn, Rm]$, $Mem[Rn + Rm] = Rt$, "",
-	"STR", $Rt, [Rn, Rm, "lsr" \#2]$, $Mem[Rn + Rm >> 2] = Rt$, "",
+// TODO Clean this up to be more generic and show what parameters are allowed.
+// TODO this table is in here twice??
+#instruction-table("Load and Store Addressing Modes", extra-column: false,
+	"MOV{S}", $Rd, "#0b000111"$, $Rd = 000111_2$,
+	"LDR", $Rt, "=some_label"$, [$Rt = upright("AddressOf")("some_label")$ \ #align(right, text(size: text-size - 1pt, "(Load 32-bit address from literal pool)"))],
+	"LDR", $Rt, [Rn]$, $Rt = Mem[Rn]$,
+	"LDR", $Rt, [Rn, \#4]$, $Rt = Mem[Rn + 4]$,
+	"LDR", $Rt, [Rn], \#+4$, $"Post:" Rt = Mem[Rn_"Orig"]; Rn = Rn + 4$,
+	"LDR", $Rt, [Rn, Rm]$, $Rt = Mem[Rn + Rm]$,
+	"LDR", $Rt, [Rn, Rm, "lsl" #3]$, $Rt = Mem[Rn + Rm << 3]$,
+	"STR", $Rt, [Rn]$, $Mem[Rn] = Rt$,
+	"STR", $Rt, [Rn, \#4]$, $Mem[Rn + 4] = Rt$,
+	"STR", $Rt, [Rn, \#4]!$, $"Pre:" Rn = Rn + 4, Mem[Rn_"New"] = Rt$,
+	"STR", $Rt, [Rn, Rm]$, $Mem[Rn + Rm] = Rt$,
+	"STR", $Rt, [Rn, Rm, "lsr" \#2]$, $Mem[Rn + Rm >> 2] = Rt$,
 )
 
 #instruction-table("Arithmetic Instructions",
 	"ADC{S}", $Rd, Rn, op2$, $Rd = Rn + op2 + carry$, "",
 	"ADD{S}", $Rd, Rn, op2$, $Rd = Rn + op2$, "",
 	"ADR", $Rd, signed "rel"_12$, $Rd = PC + "rel"^signed$, "",
-	// TODO: consider marking this type of instruction as setting flags?
-	// something like $flags <= Rd - op2$?
-	"CMN", $Rd, op2$, $Rd + op2$, "",
-	"CMP", $Rd, op2$, $Rd - op2$, "",
-	"MUL{S}", $Rd, Rn, Rm$, $Rd = Rn times Rm$, "B",
-	// TODO Address inconsistency of signed in Sat usage. If Sat^signed is signed, that implies that without the signed it's unsigned. Also, there is SATS and SATU in the source. What is the difference between S/U and the presence/absence of the signed superscript??
-	"QADD", $Rd, Rm, Rn$, $Rd = "Sat"(Rm + Rn)$, "D",
-	"QDADD", $Rd, Rm, Rn$, $Rd = "Sat"(Rm + "Sat"(2 times Rn))$, "D",
-	"QDSUB", $Rd, Rm, Rn$, $Rd = "Sat"(Rm - "Sat"(2 times Rn))$, "D",
-	"QSUB", $Rd, Rm, Rn$, $Rd = "Sat"(Rm - Rn)$, "D",
+	"CMN", $Rd, op2$, $"NZCV" <- Rd + op2$, "",
+	"CMP", $Rd, op2$, $"NZCV" <- Rd - op2$, "",
+	"MUL{S}", $Rd, Rn, Rm$, $Rd = Rn times Rm$, "",
+	"QADD", $Rd, Rm, Rn$, $Rd = "Sat"^signed (Rm + Rn)$, "Q",
+	"QDADD", $Rd, Rm, Rn$, $Rd = "Sat"^signed (Rm + "Sat"^signed(2 times Rn))$, "Q",
+	"QSUB", $Rd, Rm, Rn$, $Rd = "Sat"^signed (Rm - Rn)$, "Q",
+	"QDSUB", $Rd, Rm, Rn$, $Rd = "Sat"^signed (Rm - "Sat"^signed(2 times Rn))$, "Q",
 	"RSB{S}", $Rd, Rn, op2$, $Rd = op2 - Rn$, "",
 	"RSC{S}", $Rd, Rn, op2$, $Rd = op2 - (Rn + carry)$, "",
 	"SBC{S}", $Rd, Rn, op2$, $Rd = Rn - (op2 + carry)$, "",
-	"SDIV", $Rd, Rn, Rm$, $Rd = Rn macron(div) Rm$, "7",
-	// TODO Was this meant to be lsr? If not, what does slr mean?
-	"SSAT", $Rd, \#"st"_5, Rn{"slr"}$, $Rd = "Sat"(Rn << macron(>>) "sh", "st")^signed$, "6",
-	"SSAT16", $Rd, \#"sat"_4, Rn$, $Rd = "Sat"(Rn^signed_"H1", "sat")^signed:"Sat"(Rn^signed_"H0", "sat")^signed$, "6D",
+	"SDIV", $Rd, Rn, Rm$, $Rd = Rn macron(div) Rm$, "",
+	"SSAT", $Rd, \#"st"_5, Rn{"slr"}$, $Rd = "Sat"^signed (Rn^signed, "st")$, "Q",
+	"SSAT16", $Rd, \#"st"_4, Rn$, $Rd = "Sat"^signed (Rn^signed_"H1", "st"):"Sat"^signed (Rn^signed_"H0", "st")$, "Q",
 	"SUB{S}", $Rd, Rn, op2$, $Rd = Rn - op2$, "",
-	"UDIV", $Rd, Rn, Rm$, $Rd = Rn div Rm$, "7",
-	"USAT", $Rd, \#"st"_5, Rn{"slr"}$, $Rd = "Sat"(Rn << macron(>>) "sh", "st")$, "6",
-	// TODO What is $i$ here?
-	"USAT16", $Rd, \#"sat"_4, Rn$, $Rd = "Sat"(Rn^signed_"H1", "sat"):"Sat"(Rn^signed_"H0", "i")$, "6D",
-	colspanx(2, $"Sat"$), [If the result is out of bounds, it is clamped to the available range (by default, 32 bits). $"Sat"^signed$ = signed.], "",
+	"UDIV", $Rd, Rn, Rm$, $Rd = Rn div Rm$, "",
+	"USAT", $Rd, \#"st"_5, Rn{"slr"}$, $Rd = "Sat"^unsigned (Rn^signed, "st")$, "Q",
+	"USAT16", $Rd, \#"st"_4, Rn$, $Rd = "Sat"^unsigned (Rn^signed_"H1", "st"):"Sat"^unsigned (Rn^signed_"H0", "st")$, "Q",
+	colspanx(2, $"Sat"^x (v, "bits")$), [If $v$ is out of bounds, it is clamped to $"bits"$ bits. For $x$, $signed$ (signed) or $unsigned$ (unsigned) indicate which range it is clamped to. $v$ is always interpreted as signed.], "",
+)
+
+#let thumbstate = $upright(T)$
+
+#instruction-table("Branch and Jump Instructions", extra-column: false,
+	"B", $"rel"_24$, $PC = PC + "rel"^signed_24 << 2$,
+	"Bcc", $"rel"_24$, $ifm("cc") PC = PC + "rel"^signed_24 << 2$,
+	"BL", $"rel"_24$, $LR = PC; PC = PC + "rel"^signed_24 << 2$,
+	// The ARM website does not explicitly mention that the Thumb state is saved in `LR`, but this SE link says it does: <https://electronics.stackexchange.com/questions/293238/arm-mode-and-thumb-mode-makes-the-pcs-bit-0>
+	"BLX", $"rel"_24$, [$LR = PC_(31:1):thumbstate_0; PC = PC + "rel"^signed_24 << 1$ (Can change mode)],
+	"BLX", $Rm$, $LR = PC_(31:1):thumbstate_0; PC = Rm_(31:1):0; thumbstate = Rm_0$,
+	"BX", $Rm$, [$PC = Rm_(31:1):0; upright(T) = Rm_0$],
 )
 
 #let fN = $upright(N)$
@@ -202,7 +196,7 @@
 #let fZ = $upright(Z)$
 #let fV = $upright(V)$
 
-#info-table("Condition Codes (cc)", 3,
+#info-table("Condition Codes (cc): Negative, Zero, Carry, oVerflow", 3,
 	"EQ", "Equal", $fZ$,
 	"NE", "Not equal", $!fZ$,
 	"CS/HS", "Carry set, Unsigned higher or same", $fC$,
@@ -220,11 +214,13 @@
 	"AL", "Always (default)", $1$,
 )
 
+#info-table("Notes for Instruction Set", 2,
+	"Q", "Sets the Q flag in APSR",
+)
+
 #ascii-table
 
 #powers-hex-table
-
-// TODO add a small table here for frequencies and periods, like Ghz and picoseconds.
 
 #gdb-table
 
@@ -233,143 +229,122 @@
 #let addr = $upright("addr")$
 #let SP = $upright("SP")$
 
-#let AS = $upright("AS")$
-
-#instruction-table("ARM LDR/STR Addressing Modes",
-	// TODO what does the # mean? Is this meant to indicate a number literal?
-	// TODO why the comma? Is this bash alternation syntax?
-	"non-T", $[Rn{, \#signed i_8}]{!}$, $addr = Rn + i^signed; space "if"(!) Rn = addr$, "",
-	"xxR{,B}", $[Rn{, \#signed i_12}]{!}$, $addr = Rn + i^signed; "if"(!) Rn = addr$, "",
-	"any", $[Rn]{, \#signed i_8}$, $addr = Rn; space Rn "+=" i^signed$, "",
-	// TODO now this just seems inconsistent!
-	"xxR{,B}{T}", $[Rn], \#signed i_12$, $addr = Rn; space Rn "+=" i^signed$, "",
-	"non-T", $[Rn, signed Rm]{!}$, $addr = Rn plus.minus Rm; space "if"(!) Rn = addr$, "",
-	// TODO what is AS?
-	"xxR{,B}", $[Rn, signed Rm{AS}]{!}$, $addr = Rn plus.minus AS(Rm); space "if"(!) Rn = addr$, "",
-	"any", $[Rn], signed Rm$, $addr = Rn; space Rn pmeq Rm$, "",
-	"xxR{,B}{T}", $[Rn], signed Rm{AS}$, $addr = Rn; Rn pmeq AS(Rm)$, "",
-	"LD non-T", $signed "rel"_8$, $addr = PC + "rel"^signed$, "",
-	"LDR{,B}", $signed "rel"_12$, $addr = PC + "rel"^signed$, "",
+#instruction-table("Load and Store Instructions", extra-column: false,
+	"LDMDA", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt + 4]; ifm(!) Rn "-=" 4 times cnt$,
+	"LDMDB", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt]; ifm(!) Rn "-=" 4 times cnt$,
+	"LDMIA", $Rn{!}, rlist$, $rlist = [Rn]; ifm(!) Rn "+=" 4 times cnt$,
+	"LDMIB", $Rn{!}, rlist$, $rlist = [Rn + 4]; ifm(!) Rn "+=" 4 times cnt$,
+	// Whenever there are instructions that vary by data size, they should be ordered like this:
+	"LDR", $Rt, [addr]$, $Rt = [addr]$,
+	"LDRB", $Rt, [addr]$, $Rt = [addr]^unsigned_8$,
+	"LDRH", $Rt, [addr]$, $Rt = [addr]^unsigned_16$,
+	"LDRD", $Rt_1, Rt_2, [addr]$, $Rt_2:Rt_1 = [addr]_64$,
+	"LDRSB", $Rt, [addr]$, $Rt = [addr]^signed_8$,
+	"LDRSH", $Rt, [addr]$, $Rt = [addr]^signed_16$,
+	// Italic for pseudo-instruction.
+	[_POP_], $rlist$, $rlist = [SP]; SP "+=" 4 times cnt$,
+	[_PUSH_], $rlist$, $SP "-=" 4 times cnt; [SP] = rlist$,
+	"STMDA", $Rn{!}, rlist$, $[Rn - 4 times cnt + 4] = rlist; ifm(!) Rn "-=" 4 times cnt$,
+	"STMDB", $Rn{!}, rlist$, $[Rn - 4 times cnt] = rlist; ifm(!) Rn "-=" 4 times cnt$,
+	"STMIA", $Rn{!}, rlist$, $[Rn] = rlist; ifm(!) Rn "+=" 4 times cnt$,
+	"STMIB", $Rn{!}, rlist$, $[Rn + 4] = rlist; ifm(!) Rn "+=" 4 times cnt$,
+	"STR", $Rt, [addr]$, $[addr] = Rt$,
+	"STRB", $Rt, [addr]$, $[addr]_8 = Rt_(7:0)$,
+	"STRH", $Rt, [addr]$, $[addr]_16 = Rt_(15:0)$,
+	"STRD", $Rt_1, Rt_2, [addr]$, $[addr]_64 = Rt_2:Rt_1$,
 )
 
-#instruction-table("Special Instructions",
-	"DBG", $\#i_4$, $"DebugHint"(i)$, "7",
-	"DMB", [_option_], $"DataMemoryBarrier"("option")$, "I,7",
-	"DSB", [_option_], $"DataSynchronizationBarrier"("option")$, "I,7",
-	"ISB", "SY", $"InstructionSynchronizationBarrier"("SY")$, "I,7",
-	"NOP", "", "", "6k",
-	"PLD{W}", $[addr]$, $"PreloadData"(addr)$, "",
-	"PLI", $[addr]$, $"PreloadInstruction"(addr)$, "7",
-	"SETEND", ${"BE/LE"}$, $"EndianState" = {"BE/LE"}$, "I,6",
-	"SEV", "", $"SendEvent"()$, "6k",
-	"SVC", $\#i_24$, $"CallSupervisor"(i)$, "",
-	"UDF", $\#i_16$, $"UndefinedException"(i)$, "",
-	"WFE", "", $"WaitForEvent"()$, "6k",
-	"WFI", "", $"WaitForInterrupt"()$, "6k",
-	"YIELD", "", $"HintYield"()$, "6k",
+#let AS = $upright("AS")$
+
+// TODO reformat the first column. it's very confusing.
+#instruction-table("ARM LDR/STR Addressing Modes", extra-column: false,
+	"non-T", $[Rn{, \#i_8}]{!}$, $addr = Rn + i^signed; ifm(!) Rn = addr$,
+	"xxR{,B}", $[Rn{, \#i_12}]{!}$, $addr = Rn + i^signed; ifm(!) Rn = addr$,
+	"any", $[Rn]{, \#i_8}$, $addr = Rn; Rn "+=" i^signed$,
+	"xxR{,B}{T}", $[Rn], \#signed i_12$, $addr = Rn; Rn "+=" i^signed$,
+	"non-T", $[Rn, Rm]{!}$, $addr = Rn + Rm; ifm(!) Rn = addr$,
+	"xxR{,B}", $[Rn, Rm{AS}]{!}$, $addr = Rn + AS(Rm); ifm(!) Rn = addr$,
+	"any", $[Rn], Rm$, $addr = Rn; Rn "+=" Rm$,
+	"xxR{,B}{T}", $[Rn], Rm{AS}$, $addr = Rn; Rn "+=" AS(Rm)$,
+	// TODO what are these even?
+	"LD non-T", $signed "rel"_8$, $addr = PC + "rel"^signed$,
+	"LDR{,B}", $signed "rel"_12$, $addr = PC + "rel"^signed$,
+)
+
+#let APSR = $"APSR"$
+
+#instruction-table("Special Instructions", extra-column: false,
+	"BKPT", $\#i_16$, $"BreakPoint"(i)$,
+	"DBG", $\#i_4$, $"DebugHint"(i)$,
+	"DMB", [_option_], $"DataMemoryBarrier"("option")$,
+	"DSB", [_option_], $"DataSynchronizationBarrier"("option")$,
+	"ISB", "SY", $"InstructionSynchronizationBarrier"("SY")$,
+	"NOP", "", "Do nothing (still an instruction)",
+	"PLD{W}", $[addr]$, $"PreloadData"(addr)$,
+	"PLI", $[addr]$, $"PreloadInstruction"(addr)$,
+	"SETEND", ${"BE/LE"}$, $"EndianState" = {"BE/LE"}$,
+	"SEV", "", $"SendEvent"()$,
+	"SVC", $\#i_24$, $"CallSupervisor"(i)$,
+	"UDF", $\#i_16$, $"UndefinedException"(i)$,
+	"WFE", "", $"WaitForEvent"()$,
+	"WFI", "", $"WaitForInterrupt"()$,
+	"YIELD", "", $"HintYield"()$,
+	"MSR", $APSR, op2$, $APSR = op2$,
+	"MRS", $Rd, APSR$, $Rd = APSR$,
 )
 
 #let Ra = $upright("Ra")$
-// TODO what does this mean? More descriptive name.
 #let mtimes = $macron(times)$
 
-// TODO why were some entries duplicated here, in the form "XYZ" + "XYZ{S}", when a single "XYZ{S}" entry would suffice?
-// TODO explain meanings of a, xy, xyz, H0 and H1, plus.minus operator
-#instruction-table("Multiplication Instructions",
+#instruction-table("Multiplication Instructions", extra-column: false,
 	// Putting the addition first for consistency with MLS.
-	"MLA{S}", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn times Rm$, "",
-	"MLS", $Rd, Rn, Rm, Ra$, $Rd = Ra - Rn times Rm$, "6t",
-	"MUL{S}", $Rd, Rn, Rm$, $Rd = Rn times Rm$, "",
-	"SMLAxy", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"Hx" mtimes Rm^signed_"Hy"$, "D",
-	"SMLaD", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"H0" mtimes Rm^signed_"H0" signed Rn^signed_"H1" mtimes Rm^signed_"H1"$, "6,D",
-	"SMLaDX", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus_"xyz" Rn^signed_"H1" mtimes Rm^signed_"H1"$, "D",
-	// TODO is Rd_1, Rd_2 an acceptable way to show this? Maybe Rd_lo, Rd_hi, or something like that?
-	"SMLaLD", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$, "6,D",
-	"SMLaLDX", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"H0" mtimes Rm^signed_"H1" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H0"$, "D",
-	"SMLAL{S}", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn mtimes Rm$, "",
-	"SMLALxy", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"Hx" mtimes Rm^signed_"Hy"$, "D",
-	"SMLAWy", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn mtimes Rm^signed_"Hy"$, "D",
-	"SMMLa", $Rd, Rn, Rm, Ra$, $Rd = Ra plus.minus (Rn mtimes Rm)_(63:32)$, "6,D",
-	"SMMLaR", $Rd, Rn, Rm, Ra$, $Rd = Ra plus.minus (Rm mtimes Rm + "0x8000" #thousand 0000)_(63:32)$, "D",
-	"SMMUL", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm)_(63:32)$, "6,D",
-	"SMMULR", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm + "0x8000" #thousand 0000)_(63:32)$, "D",
-	"SMUaD", $Rd, Rn, Rm$, $Rd = Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$, "6,D",
-	"SMUaDX", $Rd, Rn, Rm$, $Rd = Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$, "D",
-	"SMULxy", $Rd, Rn, Rm$, $Rd = Rn^signed_"Hx" mtimes Rm^signed_"Hy"$, "D",
-	"SMULL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn mtimes Rm$, "",
-	"SMULL{S}", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn mtimes Rm$, "",
-	"SMULWy", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm^signed_"Hy")_(47:16)$, "D",
-	"UMAAL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rd_1 + Rd_2 + Rn times Rm$, "D",
-	"UMLAL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn times Rm$, "",
-	"UMULL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn times Rm$, "",
-)
-
-#instruction-table("Load and Store Instructions",
-	"LDMDA", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt + 4]; space "if"(!) Rn "-=" 4 times cnt$, "",
-	"LDMDB", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt]; space "if"(!) Rn "-=" 4 times cnt$, "",
-	// TODO why was the I italic in the original?
-	"LDMIA", $Rn{!}, rlist$, $rlist = [Rn]; space "if"(!) Rn "+=" 4 times cnt$, "",
-	"LDMIB", $Rn{!}, rlist$, $rlist = [Rn + 4]; space "if"(!) Rn "+=" 4 times cnt$, "",
-	// TODO what is the T suffix?
-	"LDR{T}", $Rt, [addr]$, $Rt = [addr]$, "",
-	"LDRB{T}", $Rt, [addr]$, $Rt = [addr]^diameter_8$, "",
-	"LDRD", $Rt_1, Rt_2, [addr]$, $Rt_2:Rt_1 = [addr]$, "",
-	"LDRH{T}", $Rt, [addr]$, $Rt = [addr]^diameter_16$, "",
-	"LDRSB{T}", $Rt, [addr]$, $Rt = [addr]^signed_8$, "",
-	"LDRSH{T}", $Rt, [addr]$, $Rt = [addr]^signed_16$, "",
-	// TODO are the italics in the original document meant to indicate pseudoinstructions?
-	[_POP_], $rlist$, $rlist = [SP]; SP "+=" 4 times cnt$, "",
-	[_PUSH_], $rlist$, $SP "-=" 4 times cnt; [SP] = rlist$, "",
-	"STMDA", $Rn{!}, rlist$, $[Rn - 4 times cnt + 4] = rlist; space "if"(!) Rn "-=" 4 times cnt$, "",
-	"STMDB", $Rn{!}, rlist$, $[Rn - 4 times cnt] = rlist; space "if"(!) Rn "-=" 4 times cnt$, "",
-	// TODO why was the I italic in the original?
-	"STMIA", $Rn{!}, rlist$, $[Rn] = rlist; space "if"(!) Rn "+=" 4 times cnt$, "",
-	"STMIB", $Rn{!}, rlist$, $[Rn + 4] = rlist; space "if"(!) Rn "+=" 4 times cnt$, "",
-	"STR{T}", $Rt, [addr]$, $[addr] = Rt$, "",
-	"STRB{T}", $Rt, [addr]$, $[addr]_8 = Rt_(7:0)$, "",
-	// TODO I used _64 here to be consistent with the _8 in the previous entry. However I noticed some other cases where this convention was not used, e.g., LDRD. We should probably make this consistent.
-	"STRD", $Rt_1, Rt_2, [addr]$, $[addr]_64 = Rt_2:Rt_1$, "",
-	"STRH{T}", $Rt, [addr]$, $[addr]_16 = Rt_(15:0)$, "",
-)
-
-#info-table("Notes for Instruction Set", 2,
-	"6, 6k, 6, 7", "Introduced in ARMv6, v6k, v6T2, v7",
-	// TODO What?
-	"B", "Technically a Multiple Groups Instruction",
-	// TODO What?
-	"D", "Not available on ARM-M without DSP extension",
-	"I", "Can't be conditional",
-	// TODO I thought italics indicated pseudo-instructions? Should "PUSH" and "POP" be tagged with this?
-	"P", "Pseudo-instruction",
+	"MLA{S}", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn times Rm$,
+	"MLS", $Rd, Rn, Rm, Ra$, $Rd = Ra - Rn times Rm$,
+	"MUL{S}", $Rd, Rn, Rm$, $Rd = Rn times Rm$,
+	"SMLAxy", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"Hx" mtimes Rm^signed_"Hy"$,
+	"SMLaD", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"H0" mtimes Rm^signed_"H0" signed Rn^signed_"H1" mtimes Rm^signed_"H1"$,
+	"SMLaDX", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$,
+	"SMLaLD", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$,
+	"SMLaLDX", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"H0" mtimes Rm^signed_"H1" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H0"$,
+	"SMLAL{S}", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn mtimes Rm$,
+	"SMLALxy", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn^signed_"Hx" mtimes Rm^signed_"Hy"$,
+	"SMLAWy", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn mtimes Rm^signed_"Hy"$,
+	"SMMLa", $Rd, Rn, Rm, Ra$, $Rd = Ra plus.minus (Rn mtimes Rm)_(63:32)$,
+	"SMMLaR", $Rd, Rn, Rm, Ra$, $Rd = Ra plus.minus (Rm mtimes Rm + "0x8000" #thousand 0000)_(63:32)$,
+	"SMMUL", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm)_(63:32)$,
+	"SMMULR", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm + "0x8000" #thousand 0000)_(63:32)$,
+	"SMUaD", $Rd, Rn, Rm$, $Rd = Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$,
+	"SMUaDX", $Rd, Rn, Rm$, $Rd = Rn^signed_"H0" mtimes Rm^signed_"H0" plus.minus Rn^signed_"H1" mtimes Rm^signed_"H1"$,
+	"SMULxy", $Rd, Rn, Rm$, $Rd = Rn^signed_"Hx" mtimes Rm^signed_"Hy"$,
+	"SMULL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn mtimes Rm$,
+	"SMULL{S}", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn mtimes Rm$,
+	"SMULWy", $Rd, Rn, Rm$, $Rd = (Rn mtimes Rm^signed_"Hy")_(47:16)$,
+	"UMAAL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rd_1 + Rd_2 + Rn times Rm$,
+	"UMLAL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 "+=" Rn times Rm$,
+	"UMULL", $Rd_1, Rd_2, Rn, Rm$, $Rd_2:Rd_1 = Rn times Rm$,
 )
 
 #{
 let setmon = $"SetExclusiveMonitor"()$
-let pass = $"Pass"$
-let rdpass = $Rd = pass class("binary", ?) 1 : 0$
+let pass = $"Pass?"$
+let rdpass = $Rd = pass$
 instruction-table("Exclusive Load and Store Instructions",
-	"CLREX", "", $"ClearExclusiveLocal"()$, "I,6k",
-	// TODO inconsistent use of Rt as opposed to Rd. Is this based on whether it's an operation vs a simple load/store?
-	"LDREX", $Rt, [Rn]$, $Rt = [Rn]; space setmon$, "6k",
-	"LDREX", $Rt, [Rn, \#i_10]$, $Rt = [Rn + i^diameter_(9:2):0_(1:0)]; space setmon$, "6k",
-	// Sorted by size. TODO do this for the rest of the document.
-	"LDREXB", $Rt, [Rn]$, $Rt = [Rn]_(7:0); space setmon$, "6k",
-	"LDREXH", $Rt, [Rn]$, $Rt = [Rn]_(15:0); space setmon$, "6k",
-	"LDREXD", $Rt_1, Rt_2, [Rn]$, $Rt_2:Rt_1 = [Rn]; space setmon$, "6k",
-	// XXX changed this so the "target" Rt is the store location.
-	// TODO this notation may be a bit confusing because pass is a result of the store. maybe "try" would make more sense?
-	// TODO the ternary operator seems a bit confusing.
-	// TODO for some reason the spacing after the "if" looks wrong here. Putting off fixing this because we may not keep the "if".
-	"STREX", $Rd, Rn, [Rt]$, $"if"(pass) [Rt] = Rn; rdpass$, "6k",
-	"STREX", $Rd, Rn, [Rt, \#i_10]$, $"if"(pass) [Rt] = Rn; space setmon$, "6k",
-	"STREXB", $Rd, Rn, [Rt]$, $"if"(pass) [Rt]_8 = Rn_(7:0); space rdpass$, "6k",
-	"STREXH", $Rd, Rn, [Rt]$, $"if"(pass) [Rt]_16 = Rn_(15:0); space rdpass$, "6k",
-	"STREXD", $Rd, Rn_1, Rn_2, [Rt]$, $"if"(pass) [Rt]_128 = Rn_2:Rn_1; space rdpass$, "6k",
+	"CLREX", "", "Remove any exclusive monitors", "",
+	"LDREX", $Rt, [Rn]$, $Rt = [Rn]; setmon$, "",
+	// This is not supported in ARM.
+	// "LDREX", $Rt, [Rn, \#i_10]$, $Rt = [Rn + i^signed]; setmon$, "",
+	"LDREXB", $Rt, [Rn]$, $Rt = [Rn]_(7:0); setmon$, "",
+	"LDREXH", $Rt, [Rn]$, $Rt = [Rn]_(15:0); setmon$, "",
+	"LDREXD", $Rt_1, Rt_2, [Rn]$, $Rt_2:Rt_1 = [Rn]_(127:0); setmon$, "",
+	"STREX", $Rd, Rn, [Rt]$, $ifm(pass) [Rt] = Rn; rdpass$, "",
+	"STREX", $Rd, Rn, [Rt, \#i_10]$, $ifm(pass) [Rt] = Rn; rdpass$, "",
+	"STREXB", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(7:0) = Rn_(7:0); rdpass$, "",
+	"STREXH", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(15:0) = Rn_(15:0); rdpass$, "",
+	"STREXD", $Rd, Rn_1, Rn_2, [Rt]$, $ifm(pass) [Rt]_(127:0) = Rn_2:Rn_1; rdpass$, "",
 )
 }
 
-// This break is currently disabled to better allocate space.
-// #colbreak(weak: true)
+#colbreak(weak: true)
 
 #v(1em) // A slight visual break.
 #heading-group[
@@ -389,24 +364,19 @@ instruction-table("Exclusive Load and Store Instructions",
 #let FPSCR = $"FPSCR"$
 #let nzcv = $"nzcv"$
 
-// XXX I shuffled around d, n, m, etc for this whole section for consistency.
 #instruction-table("Floating-Point Register Transfer Instructions",
 	"VMOV.F32", $Sd, \#signed imm$, $Sd = signed imm$, "",
-	// XXX fixed a typo here, Sd -> Dd. Was that intentional?
-	"VMOV.F64", $Dd, \#signed imm$, $Dd = signed imm$, "",
+	"VMOV.F64", $Sd, \#signed imm$, $Sd = signed imm$, "", // Intentional error.
 	"VMOV.F32", $Sd, Sn$, $Sd = Sn$, "",
 	"VMOV.F64", $Dd, Dn$, $Dd = Dn$, "",
-	// XXX I think this function approach is clearer. Opinions?
 	"VMOV", $Rd, Sn$, $Rd = Reinterpret(Sn)$, "",
 	"VMOV", $Sd, Rn$, $Sd = Reinterpret(Rn)$, "",
 	"VMOV", $Dd, Rn_1, Rn_2$, $Dd = Reinterpret(Rn_2:Rn_1)$, "",
 	"VMOV", $Rd_1, Rd_2, Dn$, $Rd_2:Rd_1 = Reinterpret(Dn)$, "",
-	// XXX this was phrased very strangely. Also, where is this specific instruction form documented? Also, the [x] format was inconsistent with previous usage.
-	// XXX what is ".32"? single-precision?
+	// TODO What even are these two?
 	"VMOV{.32}", $"Ddx", Rn$, $Dd_"Wx" = Rn$, "",
 	"VMOV{.32}", $Rd, "Dnx"$, $Rd = Dn_"Wx"$, "",
 	"VMRS", $Rd, "system-reg"$, $Rd = "system-reg"$, "",
-	// TODO what does the "nzcv" mean here?
 	"VMRS", $"APSR_nzcv", FPSCR$, $"APSR"_nzcv = FPSCR_nzcv$, "",
 	"VMSR", $"system-reg", Rn$, $"system-reg" = Rn$, "",
 )
@@ -416,39 +386,34 @@ instruction-table("Exclusive Load and Store Instructions",
 #let fz = $"fz"$
 #let fd = $"fd"$
 #let fn = $"fn"$
+#let dz = $"fz"$
 #let Compare = $"Compare"$
+#let pmeq = sym.plus.minus + "="
 
-#instruction-table("Floating-Point Instructions",
-	"VABS.f", $fx, fy$, $fx = |fy|$, "",
-	"VADD.f", $fd, fx, fy$, $fd = fx + fy$, "",
-	// TODO what is "E"?
-	"VCMP{E}.f", $fx, \#0.0$, $FPSCR_nzcv = Compare(fx, 0.0)$, "",
-	"VCMP{E}.f", $fx, fy$, $FPSCR_nzcv = Compare(fx, fy)$, "",
-	"VCVT.F32.F64", $Sd, Dn$, $Sd = "Float2Float"(Dn)$, "",
-	"VCVT.F64.F32", $Dd, Sn$, $Dd = "Float2Float"(Sn)$, "",
-	// TODO fix spacing of angle brackets. Putting this off until we decide that this formatting is good.
-	// TODO what did the $^s$ mean?
-	// TODO the order here seems wrong. Usually with VCVT.x.y it converts from y to x. Is this an intentional error?
-	// TODO this myriad of X2Y functions could be unified to just "Cast" if we found a unified notation for the "type" of values within floating point registers. For example "^int" could mean an integer and "^fixed.i" could mean fixed-point with "i" decimal places.
-	"VCVT.sz.f", $fd, fx, \#i_5$, $fd = "Float2Fixed"(fx, i)$, "V3",
-	"VCVT.f.sz", $fd, fx, \#i_5$, $fd = "Fixed2Float"(fx, i)$, "V3",
-	// XXX What is "R"?
-	"VCVT{R}.s32.f", $Sd, fn$, $Sd = "Float2Int"(fn)$, "",
-	// XXX this was "sy" in the original. Typo?
-	"VCVT.f.s32", $fd, Sn$, $fd = "Int2Float"(Sn)$, "",
-	"VCVTx.F16.F32", $Sd, Sn$, $Sd_"Hx" = "Float2Float"(Sn)$, "V3",
-	"VCVTx.F32.F16", $Sd, Sn$, $Sd = "Float2Float"(Sn_"Hx")$, "V3",
-	// XXX this was "dz" in the original. Typo?
-	"VDIV.f", $fx, fy, fz$, $fx = fy div fz$, "",
-	"VFMa.f", $fx, fy, fz$, $fx pmeq fy times fz$, "V4",
-	"VFMNa.f", $fx, fy, fz$, $fx = -fx plus.minus fy times fz$, "V4",
-	"VMLa.f", $fx, fy, fz$, $fx pmeq floor(fy times fz)$, "",
-	"VMUL.f", $fx, fy, fz$, $fx = fy times fz$, "",
-	"VNEG.f", $fx, fy$, $fx = -fy$, "",
-	"VNMLa.f", $fx, fy, fz$, $fx = -fx plus.minus -floor(fy times fz)$, "",
-	"VNMUL.f", $fx, fy, fz$, $fx = -floor(fy times fz)$, "",
-	"VSQRT.f", $fx, fy$, $fx = sqrt(fy)$, "",
-	"VSUB.f", $fx, fy, fz$, $fx = fy - fz$, "",
+#instruction-table("Floating-Point Instructions", extra-column: false,
+	"VABS.f", $fx, fy$, $fx = |fy|$,
+	"VADD.f", $fd, fx, fy$, $fd = fx + fy$,
+	"VCMP{E}.f", $fx, \#0.0$, $FPSCR_nzcv = Compare(fx, 0.0)$,
+	"VCMP{E}.f", $fx, fy$, $FPSCR_nzcv = Compare(fx, fy)$,
+	"VCVT.F32.F64", $Sd, Dn$, $Sd = "Float2Float"(Dn)$,
+	"VCVT.F64.F32", $Dd, Sn$, $Dd = "Float2Float"(Sn)$,
+	"VCVT.sz.f", $fd, fx, \#i_5$, $fd = "Float2Fixed"(fx, i)$,
+	"VCVT.f.sz", $fd, fx, \#i_5$, $fd = "Fixed2Float"(fx, i)$,
+	"VCVT{R}.s32.f", $Sd, fn$, $Sd = "Float2Int"(fn)$,
+	"VCVT.f.s32", $fd, Sn$, $fd = "Int2Float"(Sn)$,
+	"VCVTx.F16.F32", $Sd, Sn$, $Sd_"Hx" = "Float2Float"(Sn)$,
+	"VCVTx.F32.F16", $Sd, Sn$, $Sd = "Float2Float"(Sn_"Hx")$,
+	"VDIV.f", $fx, fy, dz$, $fx = fy div dz$, // Intentional error.
+	"VFMa.f", $fx, fy, fz$, $fx pmeq fy times fz$,
+	"VFMNa.f", $fx, fy, fz$, $fx = -fx plus.minus fy times fz$,
+	// TODO why is it floored? Seems wrong.
+	"VMLa.f", $fx, fy, fz$, $fx pmeq floor(fy times fz)$,
+	"VMUL.f", $fx, fy, fz$, $fx = fy times fz$,
+	"VNEG.f", $fx, fy$, $fx = -fy$,
+	"VNMLa.f", $fx, fy, fz$, $fx = -fx plus.minus -floor(fy times fz)$,
+	"VNMUL.f", $fx, fy, fz$, $fx = -floor(fy times fz)$,
+	"VSQRT.f", $fx, fy$, $fx = sqrt(fy)$,
+	"VSUB.f", $fx, fy, fz$, $fx = fy - fz$,
 )
 
 #let mx = $"mx"$
@@ -471,7 +436,7 @@ instruction-table("Exclusive Load and Store Instructions",
 	"FPEXC", "Floating-Point EXception Control",
 	"FPSCR", "Floating-Point Status and Control Register",
 	"FPSID", "Floating-Point System ID",
-	"MVFR{0..1}", "Media and VFP feature {0..1}",
+	"MVFR{0,1,2}", "Media and VFP feature registers",
 )
 
 #{
@@ -490,15 +455,11 @@ info-table("Floating-Point Status and Control Register (FPSCR)", 3,
 	"UFE", bit(11), "Underflow exception trap enable",
 	"IXE", bit(12), "Inexact exception trap enable",
 	"IDE", bit(15), "Input Denormal exception trap enable",
-	"RMode", bit(23, 22), "Rounding mode (RN, RP, RM, RZ)",
-	// TODO what do 0 and 1 mean?
-	"FZ", bit(24), "Flush-to-zero mode",
-	// TODO what do 0 and 1 mean?
-	"DN", bit(25), "Default NaN mode",
-	// TODO what do 0 and 1 mean?
-	"AHP", bit(26), "Alternative half-precision",
-	// TODO what do 0 and 1 mean?
-	"QC", bit(27), "Cumulative saturation",
+	"RMode", bit(23, 22), "Rounding mode (nearest, plus infinity, minus infinity, zero)",
+	"FZ", bit(24), "Enable Flush-to-zero mode",
+	"DN", bit(25), "Propagate NaN operands to output",
+	"AHP", bit(26), "Use alternative half-precision format",
+	"QC", bit(27), "SIMD saturation occurred",
 	"V", bit(28), "Overflow condition flag",
 	"C", bit(29), "Carry condition flag",
 	"Z", bit(30), "Zero condition flag",
@@ -511,17 +472,13 @@ info-table("Floating-Point Status and Control Register (FPSCR)", 3,
 	"s", "Operation signedness (S or U)",
 	"z", "Data size (8, 16, or 32)",
 	"f", "Floating-point size (F32 or F64)",
-	// TODO q never used
 	"sx, dx, qx", "Single-/double-/quadword register",
 	"fx, fy, fz", "Floating-point register (Sx or Dx depending on data size)",
 	"mx, my, mz", "SIMD Register (Dx or Qx)",
-	// TODO never used
-	"cm", "SIMD comparison operator (GE, GT, LE, or LT)",
+	// TODO floor means round??
 	$floor(x)$, "Value is rounded",
-	// TODO never used for FP or SIMD stuff. Used a few times in the main ISA section. Should it be moved to a different key? Also, this doesn't address the meaning of the macron that is sometimes (always?) present over the right-shift part of the operator.
-	$x << >> y$, $(y < 0) class("binary", ?) (x >> -y) : (x << y)$,
-	// TODO never used
-	$and or$, "Maximum/minimum value",
+	"{E}", "Any NaN causes an exception",
+	"{R}", "Use the rounding mode in FPSCR instead of round-to-zero",
 )
 
 #info-table("Notes for Floating-Point and SIMD Instructions", 2,
@@ -529,3 +486,21 @@ info-table("Floating-Point Status and Control Register (FPSCR)", 3,
 	"SH, S2", "Introduced in SIMD with half-precision floats, SIMDv2",
 	"F", "Instruction with data type F32 also exists",
 )
+
+#info-table("Keys", 2,
+	"{S}", "Optional suffix; if present, update NZCV",
+	"{slr}", "An optional LSL #N or ASR #N",
+	"op2", "Immediate or shifted register",
+	"a", [A or S to make $plus.minus$ add or subtract],
+	"i, j", "Immediate operand, range 0..max or 1..max+1",
+	"rx, ry, rz, rw", "General registers",
+	"rlist", "Comma-separated registers within { }",
+	"{rb}", "Optional rotate by multiple of 8 bits",
+	"{sl}", "Optional left shift",
+	"{sr}", "Optional right shift",
+	"{AS}", [Arm shift or rotate (LSL, ROR, LSR, ASR, RRX). $AS(x)$ uses it.],
+	$"value"^signed, "value"^unsigned$, "Value is sign/zero extended",
+	$macron(times), macron(div), macron(>>)$, "Operation is signed",
+	$C$, "Carry flag as an integer",
+)
+

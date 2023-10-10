@@ -5,13 +5,6 @@
 
 #show: ref-card
 
-// TODO:
-// - Explain the meanings of mnemonic characters in the tables as comments in this document, for maintainability
-// - (Typst issue) Figure out if it is possible to write Rd:Rn without the spacing around the colon
-// - (Typst issue) math subscripts and superscripts are a bit cramped at the moment.
-
-// - Remove columns for ARM versions, and for "I" key etc
-
 #heading-group[
 = ARMv7 Quick Reference Guide
 == West Valley College
@@ -93,7 +86,7 @@
 #let unsigned = $diameter$
 #let ifm(cond) = $"if"(cond) med$
 
-#instruction-table("Bitwise and Move Instructions",
+#instruction-table("Bitwise and Move Instructions", extra-column: true,
 	"AND{S}", $Rd, Rn, op2$, $Rd = Rn land op2$, "NZC",
 	"ASR{S}", $Rd, Rn, \#shift_5$, $Rd = Rn asr shift$, "NZC",
 	"ASR{S}", $Rd, Rn, Rs$, $Rd = Rn asr Rs$, "NZC",
@@ -140,7 +133,7 @@
 
 // TODO Clean this up to be more generic and show what parameters are allowed.
 // TODO this table is in here twice??
-#instruction-table("Load and Store Addressing Modes", extra-column: false,
+#instruction-table("Load and Store Addressing Modes",
 	"MOV{S}", $Rd, "#0b000111"$, $Rd = 000111_2$,
 	"LDR", $Rt, "=some_label"$, [$Rt = upright("AddressOf")("some_label")$ \ #align(right, text(size: text-size - 1pt, "(Load 32-bit address from literal pool)"))],
 	"LDR", $Rt, [Rn]$, $Rt = Mem[Rn]$,
@@ -155,7 +148,7 @@
 	"STR", $Rt, [Rn, Rm, "lsr" \#2]$, $Mem[Rn + Rm >> 2] = Rt$,
 )
 
-#instruction-table("Arithmetic Instructions",
+#instruction-table("Arithmetic Instructions", extra-column: true,
 	"ADC{S}", $Rd, Rn, op2$, $Rd = Rn + op2 + carry$, "",
 	"ADD{S}", $Rd, Rn, op2$, $Rd = Rn + op2$, "",
 	"ADR", $Rd, signed "rel"_12$, $Rd = PC + "rel"^signed$, "",
@@ -181,7 +174,7 @@
 
 #let thumbstate = $upright(T)$
 
-#instruction-table("Branch and Jump Instructions", extra-column: false,
+#instruction-table("Branch and Jump Instructions",
 	"B", $"rel"_24$, $PC = PC + "rel"^signed_24 << 2$,
 	"Bcc", $"rel"_24$, $ifm("cc") PC = PC + "rel"^signed_24 << 2$,
 	"BL", $"rel"_24$, $LR = PC; PC = PC + "rel"^signed_24 << 2$,
@@ -229,7 +222,7 @@
 #let addr = $upright("addr")$
 #let SP = $upright("SP")$
 
-#instruction-table("Load and Store Instructions", extra-column: false,
+#instruction-table("Load and Store Instructions",
 	"LDMDA", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt + 4]; ifm(!) Rn "-=" 4 times cnt$,
 	"LDMDB", $Rn{!}, rlist$, $rlist = [Rn - 4 times cnt]; ifm(!) Rn "-=" 4 times cnt$,
 	"LDMIA", $Rn{!}, rlist$, $rlist = [Rn]; ifm(!) Rn "+=" 4 times cnt$,
@@ -257,7 +250,7 @@
 #let AS = $upright("AS")$
 
 // TODO reformat the first column. it's very confusing.
-#instruction-table("ARM LDR/STR Addressing Modes", extra-column: false,
+#instruction-table("ARM LDR/STR Addressing Modes",
 	"non-T", $[Rn{, \#i_8}]{!}$, $addr = Rn + i^signed; ifm(!) Rn = addr$,
 	"xxR{,B}", $[Rn{, \#i_12}]{!}$, $addr = Rn + i^signed; ifm(!) Rn = addr$,
 	"any", $[Rn]{, \#i_8}$, $addr = Rn; Rn "+=" i^signed$,
@@ -273,7 +266,7 @@
 
 #let APSR = $"APSR"$
 
-#instruction-table("Special Instructions", extra-column: false,
+#instruction-table("Special Instructions",
 	"BKPT", $\#i_16$, $"BreakPoint"(i)$,
 	"DBG", $\#i_4$, $"DebugHint"(i)$,
 	"DMB", [_option_], $"DataMemoryBarrier"("option")$,
@@ -296,7 +289,7 @@
 #let Ra = $upright("Ra")$
 #let mtimes = $macron(times)$
 
-#instruction-table("Multiplication Instructions", extra-column: false,
+#instruction-table("Multiplication Instructions",
 	// Putting the addition first for consistency with MLS.
 	"MLA{S}", $Rd, Rn, Rm, Ra$, $Rd = Ra + Rn times Rm$,
 	"MLS", $Rd, Rn, Rm, Ra$, $Rd = Ra - Rn times Rm$,
@@ -329,18 +322,18 @@ let setmon = $"SetExclusiveMonitor"()$
 let pass = $"Pass?"$
 let rdpass = $Rd = pass$
 instruction-table("Exclusive Load and Store Instructions",
-	"CLREX", "", "Remove any exclusive monitors", "",
-	"LDREX", $Rt, [Rn]$, $Rt = [Rn]; setmon$, "",
+	"CLREX", "", "Remove any exclusive monitors",
+	"LDREX", $Rt, [Rn]$, $Rt = [Rn]; setmon$,
 	// This is not supported in ARM.
-	// "LDREX", $Rt, [Rn, \#i_10]$, $Rt = [Rn + i^signed]; setmon$, "",
-	"LDREXB", $Rt, [Rn]$, $Rt = [Rn]_(7:0); setmon$, "",
-	"LDREXH", $Rt, [Rn]$, $Rt = [Rn]_(15:0); setmon$, "",
-	"LDREXD", $Rt_1, Rt_2, [Rn]$, $Rt_2:Rt_1 = [Rn]_(127:0); setmon$, "",
-	"STREX", $Rd, Rn, [Rt]$, $ifm(pass) [Rt] = Rn; rdpass$, "",
-	"STREX", $Rd, Rn, [Rt, \#i_10]$, $ifm(pass) [Rt] = Rn; rdpass$, "",
-	"STREXB", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(7:0) = Rn_(7:0); rdpass$, "",
-	"STREXH", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(15:0) = Rn_(15:0); rdpass$, "",
-	"STREXD", $Rd, Rn_1, Rn_2, [Rt]$, $ifm(pass) [Rt]_(127:0) = Rn_2:Rn_1; rdpass$, "",
+	// "LDREX", $Rt, [Rn, \#i_10]$, $Rt = [Rn + i^signed]; setmon$,
+	"LDREXB", $Rt, [Rn]$, $Rt = [Rn]_(7:0); setmon$,
+	"LDREXH", $Rt, [Rn]$, $Rt = [Rn]_(15:0); setmon$,
+	"LDREXD", $Rt_1, Rt_2, [Rn]$, $Rt_2:Rt_1 = [Rn]_(127:0); setmon$,
+	"STREX", $Rd, Rn, [Rt]$, $ifm(pass) [Rt] = Rn; rdpass$,
+	"STREX", $Rd, Rn, [Rt, \#i_10]$, $ifm(pass) [Rt] = Rn; rdpass$,
+	"STREXB", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(7:0) = Rn_(7:0); rdpass$,
+	"STREXH", $Rd, Rn, [Rt]$, $ifm(pass) [Rt]_(15:0) = Rn_(15:0); rdpass$,
+	"STREXD", $Rd, Rn_1, Rn_2, [Rt]$, $ifm(pass) [Rt]_(127:0) = Rn_2:Rn_1; rdpass$,
 )
 }
 
@@ -365,20 +358,20 @@ instruction-table("Exclusive Load and Store Instructions",
 #let nzcv = $"nzcv"$
 
 #instruction-table("Floating-Point Register Transfer Instructions",
-	"VMOV.F32", $Sd, \#signed imm$, $Sd = signed imm$, "",
-	"VMOV.F64", $Sd, \#signed imm$, $Sd = signed imm$, "", // Intentional error.
-	"VMOV.F32", $Sd, Sn$, $Sd = Sn$, "",
-	"VMOV.F64", $Dd, Dn$, $Dd = Dn$, "",
-	"VMOV", $Rd, Sn$, $Rd = Reinterpret(Sn)$, "",
-	"VMOV", $Sd, Rn$, $Sd = Reinterpret(Rn)$, "",
-	"VMOV", $Dd, Rn_1, Rn_2$, $Dd = Reinterpret(Rn_2:Rn_1)$, "",
-	"VMOV", $Rd_1, Rd_2, Dn$, $Rd_2:Rd_1 = Reinterpret(Dn)$, "",
+	"VMOV.F32", $Sd, \#signed imm$, $Sd = signed imm$,
+	"VMOV.F64", $Sd, \#signed imm$, $Sd = signed imm$, // Intentional error.
+	"VMOV.F32", $Sd, Sn$, $Sd = Sn$,
+	"VMOV.F64", $Dd, Dn$, $Dd = Dn$,
+	"VMOV", $Rd, Sn$, $Rd = Reinterpret(Sn)$,
+	"VMOV", $Sd, Rn$, $Sd = Reinterpret(Rn)$,
+	"VMOV", $Dd, Rn_1, Rn_2$, $Dd = Reinterpret(Rn_2:Rn_1)$,
+	"VMOV", $Rd_1, Rd_2, Dn$, $Rd_2:Rd_1 = Reinterpret(Dn)$,
 	// TODO What even are these two?
-	"VMOV{.32}", $"Ddx", Rn$, $Dd_"Wx" = Rn$, "",
-	"VMOV{.32}", $Rd, "Dnx"$, $Rd = Dn_"Wx"$, "",
-	"VMRS", $Rd, "system-reg"$, $Rd = "system-reg"$, "",
-	"VMRS", $"APSR_nzcv", FPSCR$, $"APSR"_nzcv = FPSCR_nzcv$, "",
-	"VMSR", $"system-reg", Rn$, $"system-reg" = Rn$, "",
+	"VMOV{.32}", $"Ddx", Rn$, $Dd_"Wx" = Rn$,
+	"VMOV{.32}", $Rd, "Dnx"$, $Rd = Dn_"Wx"$,
+	"VMRS", $Rd, "system-reg"$, $Rd = "system-reg"$,
+	"VMRS", $"APSR_nzcv", FPSCR$, $"APSR"_nzcv = FPSCR_nzcv$,
+	"VMSR", $"system-reg", Rn$, $"system-reg" = Rn$,
 )
 
 #let fx = $"fx"$
@@ -390,7 +383,7 @@ instruction-table("Exclusive Load and Store Instructions",
 #let Compare = $"Compare"$
 #let pmeq = sym.plus.minus + "="
 
-#instruction-table("Floating-Point Instructions", extra-column: false,
+#instruction-table("Floating-Point Instructions",
 	"VABS.f", $fx, fy$, $fx = |fy|$,
 	"VADD.f", $fd, fx, fy$, $fd = fx + fy$,
 	"VCMP{E}.f", $fx, \#0.0$, $FPSCR_nzcv = Compare(fx, 0.0)$,
@@ -424,12 +417,12 @@ instruction-table("Exclusive Load and Store Instructions",
 #let dy = $"dy"$
 
 #instruction-table("SIMD Register Transfer Instructions",
-	"VDUP.z", $mx, ry$, $mx_"z*" = ry_"z"$, "",
-	"VDUP.z", $mx, dy[i]$, $mx_"z*" = dy_"zi"$, "",
-	"VMOV.z", $dx[i], ry$, $dx_"zi" = ry_"z"$, "",
+	"VDUP.z", $mx, ry$, $mx_"z*" = ry_"z"$,
+	"VDUP.z", $mx, dy[i]$, $mx_"z*" = dy_"zi"$,
+	"VMOV.z", $dx[i], ry$, $dx_"zi" = ry_"z"$,
 	// What does "^s" mean?
-	"VMOV.sz", $rx, dy[i]$, $rx = dy_"zi"^"s"$, "",
-	"VMOV", $mx, my$, $mx = my$, "",
+	"VMOV.sz", $rx, dy[i]$, $rx = dy_"zi"^"s"$,
+	"VMOV", $mx, my$, $mx = my$,
 )
 
 #info-table("Floating-Point System Registers", 2,

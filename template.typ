@@ -54,7 +54,7 @@
 		tablex(columns: columns, align: left + horizon, header-rows: 1, map-hlines: (v) => (..v, stroke: line-stroke), map-vlines: (v) => (..v, stroke: line-stroke), auto-lines: false, inset: 3pt, fill: (_col, row) => if calc.even(row) { gray(255) } else { gray(248) }, hlinex(), vlinex(), ..args, hlinex(), vlinex())
 	})
 }
-#let instruction-table(name, extra-column: true, ..args) = info-table(name, if extra-column { 4 } else { 3 }, main-column: 2, (), vlinex(), vlinex(), (), ..args)
+#let instruction-table(name, extra-column: false, ..args) = info-table(name, if extra-column { 4 } else { 3 }, main-column: 2, (), vlinex(), vlinex(), (), ..args)
 
 #let heading-group(content) = {
 	show heading: set block(spacing: 5pt)
